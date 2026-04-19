@@ -12,6 +12,7 @@ import {
   Sparkles,
   Check,
   FileDown,
+  Upload,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import SettingsPanel from "./SettingsPanel";
@@ -53,6 +54,21 @@ export default function DocumentGenerator() {
   const [clientName, setClientName] = useState("");
   const [projectName, setProjectName] = useState("");
   const [extraNotes, setExtraNotes] = useState("");
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result;
+      if (typeof text === "string") {
+        setTranscript(text);
+      }
+    };
+    reader.readAsText(file);
+    // Reset file input so the user can upload the same file again if needed
+    e.target.value = "";
+  };
 
   // Output
   const [loading, setLoading] = useState(false);
@@ -315,13 +331,27 @@ export default function DocumentGenerator() {
             <label className="block text-xs font-semibold uppercase tracking-wide text-gray-600">
               Meeting Transcript
             </label>
-            <button
-              onClick={() => setTranscript(SAMPLE_TRANSCRIPT)}
-              className="text-[11px] text-dynamix hover:underline inline-flex items-center gap-1"
-              title="Load a sample transcript"
-            >
-              <FlaskConical className="w-3 h-3" /> Load sample
-            </button>
+            <div className="flex items-center gap-3">
+              <label 
+                className="text-[11px] text-dynamix hover:underline inline-flex items-center gap-1 cursor-pointer" 
+                title="Upload a text-based transcript file (.txt, .md, .csv, .srt, .vtt)"
+              >
+                <Upload className="w-3 h-3" /> Upload file
+                <input 
+                  type="file" 
+                  accept=".txt,.md,.csv,.srt,.vtt" 
+                  className="hidden" 
+                  onChange={handleFileUpload} 
+                />
+              </label>
+              <button
+                onClick={() => setTranscript(SAMPLE_TRANSCRIPT)}
+                className="text-[11px] text-dynamix hover:underline inline-flex items-center gap-1"
+                title="Load a sample transcript"
+              >
+                <FlaskConical className="w-3 h-3" /> Load sample
+              </button>
+            </div>
           </div>
           <textarea
             value={transcript}
